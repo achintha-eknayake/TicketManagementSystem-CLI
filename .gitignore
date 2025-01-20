@@ -37,3 +37,5 @@ build/
 ### Mac OS ###
 .DS_Store
 .idea/vcs.xml
+src/main/resources/TicketHistory.txt
+src/main/resources/ConfigurationData.json

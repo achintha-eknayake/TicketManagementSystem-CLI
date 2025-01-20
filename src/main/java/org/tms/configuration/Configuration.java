@@ -1,157 +1,75 @@
 package org.tms.configuration;
 
-import java.util.concurrent.ThreadLocalRandom;
-
-
+/**
+ * Holds the configuration settings for the ticket management system.
+ * This includes settings such as the total number of tickets, the maximum ticket release rate,
+ * the maximum customer retrieval rate, and the maximum ticket capacity.
+ */
 public class Configuration {
 
-    private int totalTickets;
-    private int ticketReleaseRate;
-    private int customerRetrievalRate;
-    private int maxTicketCapacity;
+    // Total number of tickets available in the system
+    private final int totalTickets;
 
-    private final Object LOCK = new Object();
-    private volatile boolean isRunning = true; // Ensures proper visibility across threads
+    // Maximum number of tickets a vendor can release at a time
+    private final int maximumTicketReleaseRate;
 
-    // Constructor
-    public Configuration(int totalTickets, int ticketReleaseRate, int customerRetrievalRate, int maxTicketCapacity) {
+    // Maximum number of tickets a customer can retrieve at a time
+    private final int maximumCustomerRetrievalRate;
+
+    // Maximum capacity of the ticket pool
+    private final int maxTicketCapacity;
+
+    /**
+     * Constructor to initialize configuration settings.
+     *
+     * @param totalTickets              the total number of tickets available
+     * @param maximumTicketReleaseRate  the maximum number of tickets a vendor can release at a time
+     * @param maximumCustomerRetrievalRate the maximum number of tickets a customer can retrieve at a time
+     * @param maxTicketCapacity         the maximum capacity of the ticket pool
+     */
+    public Configuration(int totalTickets, int maximumTicketReleaseRate, int maximumCustomerRetrievalRate, int maxTicketCapacity) {
         this.totalTickets = totalTickets;
-        this.ticketReleaseRate = ticketReleaseRate;
-        this.customerRetrievalRate = customerRetrievalRate;
+        this.maximumTicketReleaseRate = maximumTicketReleaseRate;
+        this.maximumCustomerRetrievalRate = maximumCustomerRetrievalRate;
         this.maxTicketCapacity = maxTicketCapacity;
     }
 
-//    public Configuration(){}
+    // Uncomment if needed for default configuration
+    // public Configuration() {}
 
-    public int getTotalTickets(){
+    /**
+     * Gets the total number of tickets available.
+     *
+     * @return the total number of tickets
+     */
+    public int getTotalTickets() {
         return totalTickets;
     }
 
-    public int getTicketReleaseRate(){
-        return ticketReleaseRate;
+    /**
+     * Gets the maximum number of tickets a vendor can release at a time.
+     *
+     * @return the maximum ticket release rate
+     */
+    public int getMaximumTicketReleaseRate() {
+        return maximumTicketReleaseRate;
     }
 
-    public int getCustomerRetrievalRate(){
-        return customerRetrievalRate;
+    /**
+     * Gets the maximum number of tickets a customer can retrieve at a time.
+     *
+     * @return the maximum customer retrieval rate
+     */
+    public int getMaximumCustomerRetrievalRate() {
+        return maximumCustomerRetrievalRate;
     }
 
-    public int getMaxTicketCapacity(){
+    /**
+     * Gets the maximum capacity of the ticket pool.
+     *
+     * @return the maximum ticket capacity
+     */
+    public int getMaxTicketCapacity() {
         return maxTicketCapacity;
-    }
-
-    // Method to gracefully stop threads
-    public void stopThreads() {
-        isRunning = false;
-        synchronized (LOCK) {
-            LOCK.notifyAll(); // Wake up any waiting threads
-        }
-        //logger.info("Threads have been signaled to stop.");
-        System.out.println("Threads have been signaled to stop");
-    }
-
-    // Producer method
-    public void produce() throws InterruptedException {
-        while (isRunning) {
-            synchronized (LOCK) {
-                while (totalTickets >= maxTicketCapacity && isRunning) {
-                    //logger.info("Producer: Maximum capacity reached. Waiting...");
-                    System.out.println("Producer: Maximum capacity reached. Waiting...");
-                    LOCK.wait();
-                }
-
-                int randomRelease = ThreadLocalRandom.current().nextInt(ticketReleaseRate)+1;
-
-                int ticketsToAdd = Math.min(randomRelease, maxTicketCapacity - totalTickets);
-                totalTickets += ticketsToAdd;
-                //logger.info("Producer: Added {} tickets. Total tickets: {}", ticketsToAdd, totalTickets);
-                System.out.println("Producer: added "+ ticketsToAdd +". Total tickets: " + totalTickets);
-                LOCK.notifyAll();
-            }
-            Thread.sleep(1000); // Simulate production delay
-        }
-        //logger.info("Producer has stopped.");
-        System.out.println("Producer has stopped");
-    }
-
-    // Consumer method
-    public void consume() throws InterruptedException {
-        while (isRunning) {
-            synchronized (LOCK) {
-                while (totalTickets <= 0 && isRunning) {
-                    //logger.info("Consumer: No tickets available. Waiting...");
-                    System.out.println("Consumer: No tickets available. Waiting...");
-                    LOCK.wait();
-                }
-
-                int randomRetrieve =ThreadLocalRandom.current().nextInt(customerRetrievalRate)+1;
-
-                int ticketsToRetrieve = Math.min(randomRetrieve, totalTickets);
-                totalTickets -= ticketsToRetrieve;
-                //logger.info("Consumer: Retrieved {} tickets. Total tickets: {}", ticketsToRetrieve, totalTickets);
-                System.out.println("Consumer: retrieved "+ ticketsToRetrieve+". Total tickets: " + totalTickets);
-
-                LOCK.notifyAll();
-            }
-            Thread.sleep(1000); // Simulate consumption delay
-        }
-        //logger.info("Consumer has stopped.");
-        System.out.println("Consumer has stopped");
-    }
-
-    // Main method
-    public static void main(String[] args) {
-        // Initialize configuration with realistic rates
-        ConfigUtility.saveConfigFile();
-        Configuration configuration = ConfigUtility.loadConfigFile();
-        // Create producer thread
-        Thread producerThread = new Thread(() -> {
-            try {
-                configuration.produce();
-            } catch (InterruptedException e) {
-                //logger.error("Producer thread interrupted.", e);
-                System.out.println("Producer thread interrupted" + e.getMessage());
-                Thread.currentThread().interrupt(); // Restore interrupted status
-            }
-        }, "Producer");
-
-        // Create consumer thread
-        Thread consumerThread = new Thread(() -> {
-            try {
-                configuration.consume();
-            } catch (InterruptedException e) {
-                //logger.error("Consumer thread interrupted.", e);
-                System.out.println("Consumer thread interrupted" + e.getMessage());
-                Thread.currentThread().interrupt(); // Restore interrupted status
-            }
-        }, "Consumer");
-
-        // Start threads
-        producerThread.start();
-        consumerThread.start();
-
-        // Run the system for a fixed duration and then stop
-        try {
-            Thread.sleep(15000); // Let the system run for 15 seconds
-        } catch (InterruptedException e) {
-            //logger.error("Main thread interrupted.", e);
-            System.out.println("Main Thread interrupted" + e.getMessage());
-            Thread.currentThread().interrupt();
-        }
-
-        // Signal threads to stop
-        configuration.stopThreads();
-
-        // Wait for threads to finish
-        try {
-            producerThread.join();
-            consumerThread.join();
-        } catch (InterruptedException e) {
-            //logger.error("Error joining threads.", e);
-            System.out.println("Error joining threads " + e.getMessage());
-            Thread.currentThread().interrupt();
-        }
-
-        //logger.info("System has stopped.");
-        System.out.println("System has stopped");
     }
 }
