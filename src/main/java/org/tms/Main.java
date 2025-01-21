@@ -9,7 +9,6 @@ import org.tms.configuration.ConfigUtility;
  */
 public class Main {
     public static void main(String[] args) {
-        // Decorative separator for console output
         String starLine = "***************************************************************";
         System.out.println(starLine);
         System.out.println("Welcome to Simulation Producer-Consumer Ticket Handling Service");
@@ -17,7 +16,7 @@ public class Main {
 
         int option;
         do {
-            // Prompt user for input
+
             option = ConfigUtility.integerInput(
                     """
                     Enter 1 if you want to run using the previously saved configuration file:
@@ -54,14 +53,13 @@ public class Main {
                     break;
 
                 default:
-                    // Handle unexpected cases (shouldn't occur due to validation)
+                    // Handle invalid option
                     System.out.println("Invalid option. Please try again.");
                     break;
             }
 
         } while (option != 0); // Loop until the user chooses to exit
 
-        // Farewell message
         System.out.println("Thank you for using the Ticket Handling Simulation!");
     }
 }
