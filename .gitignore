@@ -39,3 +39,4 @@ build/
 .idea/vcs.xml
 src/main/resources/TicketHistory.txt
 src/main/resources/ConfigurationData.json
+src/main/resources/ConfigurationData.json
