@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a Vendor that periodically adds tickets to a shared TicketPool.
- * Vendors release a specific number of tickets at defined intervals. The
+ * Vendors releases a specific number of tickets at defined intervals. The
  * operation can be stopped by invoking the {@link #stop()} method.
  */
 public class Vendor implements Runnable {
@@ -27,12 +27,7 @@ public class Vendor implements Runnable {
     private volatile boolean isRunning = true;
 
     /**
-     * Constructs a new Vendor instance with specified parameters.
-     *
-     * @param vendorId         the unique identifier of the vendor
-     * @param ticketsPerRelease the number of tickets to release per interval
-     * @param releaseInterval  the interval (in milliseconds) between ticket releases
-     * @param ticketPool       the shared TicketPool object
+     * Constructor for Vendor instance.
      */
     public Vendor(int vendorId, int ticketsPerRelease, int releaseInterval, TicketPool ticketPool) {
         this.vendorId = vendorId;
@@ -41,16 +36,6 @@ public class Vendor implements Runnable {
         this.ticketPool = ticketPool;
     }
 
-    /**
-     * Default constructor for Vendor with predefined values.
-     * Initializes with default vendor ID, ticket release rate, and interval.
-     */
-    public Vendor() {
-        this.vendorId = 0;
-        this.ticketsPerRelease = 1; // Default to releasing 1 ticket
-        this.releaseInterval = 1000; // Default interval (1 second)
-        this.ticketPool = null; // No TicketPool associated by default
-    }
 
     /**
      * The main execution method for the vendor thread.
@@ -62,7 +47,7 @@ public class Vendor implements Runnable {
         // Keep running while the isRunning flag is true and the thread is not interrupted
         while (isRunning && !Thread.currentThread().isInterrupted()) {
             try {
-                // Log the ticket release action
+                // Log the ticket release
                 System.out.println("Vendor " + vendorId + " is releasing " + ticketsPerRelease + " tickets.");
 
                 // Add tickets to the ticket pool

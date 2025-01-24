@@ -6,34 +6,29 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a Customer that attempts to purchase tickets from a TicketPool.
- * The customer periodically attempts to retrieve a specified number of tickets
+ * The customer retrieves a specified number of tickets
  * at defined intervals. The behavior of the customer can be stopped by invoking
  * the {@link #stop()} method.
  */
 public class Customer implements Runnable {
 
     // Unique ID for the customer
-    private int customerId;
+    private final int customerId;
 
     // Interval in milliseconds between ticket retrieval attempts
-    private int retrievalInterval;
+    private final int retrievalInterval;
 
     // Number of tickets the customer tries to retrieve in each attempt
-    private int retrievalRate;
+    private final int retrievalRate;
 
     // Shared TicketPool object from which tickets are retrieved
-    private TicketPool ticketPool;
+    private final TicketPool ticketPool;
 
     // Flag to indicate whether the customer thread should continue running
     private volatile boolean isRunning = true;
 
     /**
-     * Constructs a new Customer instance.
-     *
-     * @param customerId        the unique identifier of the customer
-     * @param retrievalInterval the interval (in milliseconds) between retrieval attempts
-     * @param retrievalRate     the number of tickets the customer attempts to retrieve per attempt
-     * @param ticketPool        the shared TicketPool object
+     * Constructor for Customer instance.
      */
     public Customer(int customerId, int retrievalInterval, int retrievalRate, TicketPool ticketPool) {
         this.customerId = customerId;
@@ -44,17 +39,15 @@ public class Customer implements Runnable {
 
     /**
      * The main execution method for the customer thread.
-     * Continuously attempts to retrieve tickets from the ticket pool
-     * at the specified intervals until stopped or interrupted.
+     * Continuously attempts to retrieve tickets from the ticket pool with specified time intervals {@code retrievalRate}
      */
     @Override
     public void run() {
         // Keep running while the isRunning flag is true and the thread is not interrupted
         while (isRunning && !Thread.currentThread().isInterrupted()) {
             try {
-                // Log the ticket purchase attempt
-                System.out.println("Customer " + customerId + " is attempting to purchase " + retrievalRate + " Tickets");
 
+                System.out.println("Customer " + customerId + " is attempting to purchase " + retrievalRate + " Tickets");
                 // Attempt to retrieve tickets from the ticket pool
                 boolean success = ticketPool.removeTickets(retrievalRate, customerId);
 
@@ -70,10 +63,9 @@ public class Customer implements Runnable {
             } catch (InterruptedException e) {
                 // Handle interruption, log the event, and exit the loop
                 System.out.println("Customer " + customerId + " was interrupted. Exiting...");
-                Thread.currentThread().interrupt(); // Preserve the interrupt status
+                Thread.currentThread().interrupt(); // Restore interrupt status
             }
         }
-        // Log when the customer stops running
         System.out.println("Customer " + customerId + " has stopped.");
     }
 

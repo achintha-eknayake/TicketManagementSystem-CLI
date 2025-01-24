@@ -36,19 +36,20 @@ public class ConfigUtility {
                 if (value < 0) {
                     throw new NegativeValueException("Negative values are not allowed!");
                 }
-                valid = true; // Mark input as valid if successful
+                valid = true; // If input as valid if successful exits the loop
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid integer!"); // Handle non-integer input
             } catch (NegativeValueException e) {
                 System.out.println(e.getMessage()); // Handle negative values
             }
         }
-        return value; // Return the valid integer
+        return value;
     }
 
     /**
-     * Saves the configuration to a JSON file after gathering input from the user.
+     * Saves user input of the configuration to a JSON file.
      * Ensures ticket capacity is greater than or equal to the total number of tickets.
+     * Displays the saved configuration file
      */
     public static void saveConfigFile() {
         int ticketCapacity;
@@ -63,8 +64,8 @@ public class ConfigUtility {
             }
         } while (totalTickets > ticketCapacity);
 
-        int ticketReleaseRate = integerInput("Ticket release rate: ");
-        int ticketRetrievalRate = integerInput("Ticket retrieval rate: ");
+        int ticketReleaseRate = integerInput("Maximum Ticket release rate: ");
+        int ticketRetrievalRate = integerInput("Maximum Ticket retrieval rate: ");
 
         Configuration configuration = new Configuration(totalTickets, ticketReleaseRate, ticketRetrievalRate, ticketCapacity);
 
@@ -86,7 +87,7 @@ public class ConfigUtility {
     }
 
     /**
-     * Loads the configuration from a JSON file.
+     * Loads the configuration from a JSON file.</br>
      * If the file does not exist or is invalid, prompts the user to create a new configuration.
      *
      * @return the loaded or newly created {@link Configuration}
@@ -112,6 +113,7 @@ public class ConfigUtility {
                         (int) maxTicketCapacity
                 );
 
+                // Display configration file
                 System.out.println("Loaded Configuration:");
                 System.out.println("Total Tickets: " + totalTickets);
                 System.out.println("Ticket Release Rate: " + ticketReleaseRate);
@@ -130,10 +132,7 @@ public class ConfigUtility {
     }
 
     /**
-     * Retrieves the configuration by attempting to load it from the file.
-     * If the file does not exist, it prompts the user to create a new configuration.
-     *
-     * @return the {@link Configuration} object
+     * Retrieves the configuration by loading it from the file.
      */
     public static Configuration getConfiguration() {
         Configuration configuration = null;
@@ -156,14 +155,9 @@ public class ConfigUtility {
                         (int) maxTicketCapacity
                 );
             } catch (IOException e) {
-                System.err.println("Error loading configuration: " + e.getMessage());
+                System.err.println("Error loading configuration: " );
             }
-        } else {
-            System.out.println("Configuration file not found. Creating a new configuration.");
-            saveConfigFile();
-            configuration = loadConfigFile(); // Reload after creating a new file
         }
-
         return configuration;
     }
 }

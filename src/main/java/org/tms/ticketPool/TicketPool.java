@@ -24,7 +24,7 @@ public class TicketPool {
     // Counter for generating unique ticket IDs
     private final AtomicInteger ticketCounter = new AtomicInteger(0);
 
-    // Map to maintain ticket history (e.g., availability, who bought it)
+    // Map to maintain ticket history
     private final Map<Integer, String> ticketHistory = new ConcurrentHashMap<>();
 
     // Lock for thread synchronization
@@ -35,9 +35,6 @@ public class TicketPool {
 
     // Flag to alternate turns between vendors and customers
     private boolean isVendorTurn = true;
-
-    // Counter to track the total number of tickets sold
-    private final AtomicInteger totalTicketsSold = new AtomicInteger(0);
 
     // File path for saving ticket history
     private static final String TICKET_HISTORY_FILE = "src/main/resources/TicketHistory.txt";
@@ -86,6 +83,22 @@ public class TicketPool {
         }
     }
 
+    public synchronized void addTicket2(int count, int vendorId) throws InterruptedException {
+        // Wait until it is the vendor's turn
+        while (!isVendorTurn) {
+            wait();
+        }
+        // Add tickets to the pool and update history
+        for (int i = 0; i < count; i++) {
+            int ticketId = ticketCounter.incrementAndGet();
+            tickets.add(ticketId);
+            ticketHistory.put(ticketId, "Added by Vendor " + vendorId);
+        }
+        // Switch to customer's turn and signal all waiting threads
+        isVendorTurn = false;
+        notifyAll();
+    }
+
     /**
      * Allows a customer to retrieve a specified number of tickets from the pool.
      *
@@ -128,15 +141,6 @@ public class TicketPool {
      */
     public int getTicketCount() {
         return tickets.size();
-    }
-
-    /**
-     * Retrieves the transaction history of all tickets.
-     *
-     * @return a map containing ticket IDs and their transaction history
-     */
-    public Map<Integer, String> getTicketHistory() {
-        return ticketHistory;
     }
 
     /**

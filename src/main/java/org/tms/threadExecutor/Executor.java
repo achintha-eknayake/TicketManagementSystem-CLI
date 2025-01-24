@@ -14,10 +14,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the execution of the ticket pool simulation involving vendors and customers.
- * The simulation includes:
- * - Vendors adding tickets to the ticket pool at specified intervals.
- * - Customers retrieving tickets from the ticket pool at specified intervals.
- * The simulation is run for a user-defined duration, after which all threads are stopped.
+ * The simulation includes:</br>
+ * - Vendors adding tickets to the ticket pool at specified intervals.</br>
+ * - Customers retrieving tickets from the ticket pool at specified intervals.</br>
+ * The simulation runs for a user-defined duration, after which all threads are stopped.
  */
 public class Executor {
 
@@ -27,9 +27,9 @@ public class Executor {
      * for the specified duration.
      */
     public static void runVendorCustomerCLI() {
-        // Initialize the ticket pool
+
         TicketPool ticketPool = new TicketPool();
-        ticketPool.initializeAvailableTickets();
+        ticketPool.initializeAvailableTickets(); // Initialize total tickets given by configuration class
 
         // Create a thread pool for managing vendors and customers
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -41,7 +41,7 @@ public class Executor {
         // Get the simulation runtime duration from the user
         int timeDuration = ConfigUtility.integerInput("Enter simulation running time in seconds ");
 
-        // Configure vendors and customers based on user input
+        // Setup vendors and customers by given user input
         configureVendorsAndCustomers(ticketPool, vendors, customers);
 
         try {
@@ -93,7 +93,7 @@ public class Executor {
             vendors.add(new Vendor(i, ticketsReleaseRate, releaseInterval, ticketPool));
         }
 
-        // Configure customers
+        // Configure customers details
         int customerCount = ConfigUtility.integerInput("Enter the number of customers: ");
         for (int i = 1; i <= customerCount; i++) {
             int retrievalRate;
